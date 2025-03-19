@@ -1,7 +1,7 @@
 //& "C:\Program Files\Cppcheck\cppcheck.exe" --enable=all Project.cpp
 //--inconclusive --quiet --checkers-report=file.txt
 
-//#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include <string.h>
 #include <iomanip>
