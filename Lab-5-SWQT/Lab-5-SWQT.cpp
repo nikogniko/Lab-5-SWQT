@@ -147,6 +147,11 @@ class Hotel
 	Room a[100];			//ARRAY OF ROOMS
 	Customer c[100];			//ARRAY OF CUSTOMERS
 	int nroom = 0, ncust = 0;	//NO OF ROOMS AND CUSTOMERS
+private:
+	bool isRoomNumberValid(int rno);
+	bool isRoomNumberUnique(int rno, int currentIndex);
+	bool isRoomAvailable(int rno, int& index);
+	void processBooking(int index, int rno);
 public:
 	void addRooms();		//ADD ROOMS TO DATABASE
 	void searchroom();		//SEARCH FOR A PARTICULAR ROOM
@@ -157,10 +162,10 @@ public:
 	void Summary();			//GUEST SUMMARY
 };
 
-void Hotel::addRooms()
-{
+void Hotel::addRooms() {
 	cout << "Enter number of rooms: ";
-	cin >> nroom;			//ACCEPTING NUMBER OF ROOMS
+	cin >> nroom;
+
 	while (nroom <= 0) {
 		cout << "Invalid. Enter valid number of rooms: ";
 		cin >> nroom;
@@ -169,25 +174,32 @@ void Hotel::addRooms()
 	for (int i = 0; i < nroom; i++) {
 		cout << "ROOM " << (i + 1) << endl;
 		int rno;
-		while (true) {
-			cout << endl << "Enter room number : ";
+
+		do {
+			cout << "\nEnter room number: ";
 			cin >> rno;
-			if (rno <= 0) {
-				cout << "This room number is invalid! Please Re-enter: ";
-				continue;
-			}
-			bool duplicate = false;		//VALIDATIONS FOR REPETITIVE ROOM NUMBERS
-			for (int j = 0; j < i; j++) {
-				if (a[j].roomNumber == rno) {
-					cout << "Invalid. Repetitive room number. Try again.\n";
-					duplicate = true;
-					break;
-				}
-			}
-			if (!duplicate) break;
-		}
-		a[i].acceptroom(rno);		//CALLING FUNCTION ACCEPT ROOM FROM CLASS ROOM
+		} while (!isRoomNumberValid(rno) || !isRoomNumberUnique(rno, i));
+
+		a[i].acceptroom(rno);
 	}
+}
+
+bool Hotel::isRoomNumberValid(int rno) {
+	if (rno <= 0) {
+		cout << "This room number is invalid! Please re-enter.\n";
+		return false;
+	}
+	return true;
+}
+
+bool Hotel::isRoomNumberUnique(int rno, int currentIndex) {
+	for (int j = 0; j < currentIndex; j++) {
+		if (a[j].roomNumber == rno) {
+			cout << "Invalid. Repetitive room number. Try again.\n";
+			return false;
+		}
+	}
+	return true;
 }
 
 void Hotel::availability()		//CHECKING AVAILABILITY OF THE ROOMS
@@ -235,97 +247,89 @@ void Hotel::searchroom()	//SEARCH FOR A PARTICULAR TYPE OF A ROOM
 	}
 }
 
-void Hotel::CheckIn() // CHECK IN OF A CUSTOMER
-{
-	if (nroom == 0)
-	{
+void Hotel::CheckIn() {
+	if (nroom == 0) {
 		cout << "Please add rooms." << endl;
 		return;
 	}
 
-	if (ncust > nroom)	//CHECKING CONDITION IF HOTEL HAS EMPTY ROOMS
-	{
+	if (ncust > nroom) {
 		cout << "Sorry! Hotel is Full." << endl;
 		return;
 	}
 
-	c[ncust].booking_id = ncust + 1; // ALLOTING CUSTOMER ID TO THE CUSTOMER
-	int rno;
-	bool validRoom = false;
+	c[ncust].booking_id = ncust + 1; // Присвоєння ID клієнту
+	int rno, index;
 
-	while (!validRoom)
-	{
-		cout << "Enter room number="; // ASKING WHAT ROOM NUMBER CUSTOMER WANTS TO STAY IN
+	do {
+		cout << "Enter room number=";
 		cin >> rno;
+	} while (!isRoomAvailable(rno, index));
 
-		for (int i = 0; i < nroom; i++)
-		{
-			if (rno == a[i].roomNumber)
-			{
-				validRoom = true;
+	processBooking(index, rno);
+}
 
-				if (a[i].status == 0) // CHECKING IF ROOM IS UNOCCUPIED
-				{
-					char ch2;
-					cout << "Room available." << endl;
-					a[i].displayroom();
-					cout << "Do you wish to continue? Press(Y/y)";
-					cin >> ch2;
-
-					if (ch2 == 'Y' || ch2 == 'y')
-					{
-						c[ncust].accept(); // ACCEPTING CUSTOMER DETAILS
-						cout << "Enter number of days of stay: ";
-						cin >> c[ncust].days;
-						c[ncust].bill = c[ncust].days * a[i].rent;	//generating bill. bill= No. of days * rent per day.
-
-						cout << "Your total bill will approx be Rs." << c[ncust].bill << ". Min adv payment=" << c[ncust].bill / 4 << " What will you be paying?";
-						cin >> c[ncust].payment_advance;
-
-						while (c[ncust].payment_advance < c[ncust].bill / 4 || c[ncust].payment_advance > c[ncust].bill)
-						{
-							cout << "Enter valid amount.";
-							cin >> c[ncust].payment_advance;
-						}
-
-						cout << "Thank you. Booking confirmed." << endl;
-						cout << "--------------------------------------------------------------" << endl;
-						cout << "Booking Id: " << c[ncust].booking_id << "\nName: " << c[ncust].name << "\nRoom no.: " << rno << "\nDate: ";
-
-						time_t my_time = time(NULL);
-						struct tm ltm;  // Оголошуємо змінну для структури tm
-#ifdef _WIN32  // Перевіряємо, чи компілюємо в Windows
-						localtime_s(&ltm, &my_time);  // Windows-специфічна потокобезпечна версія
-#else
-						localtime_r(&my_time, &ltm);  // POSIX-версія для Linux/macOS
-#endif
-						cout << put_time(&ltm, "%Y-%m-%d %H:%M:%S") << endl;
-
-						a[i].status = 1; // changing room status to booked
-						c[ncust].room = rno;
-						c[ncust].status = 1;
-						ncust++;
-						return;
-					}
-					else
-					{
-						validRoom = false; // Повторний вибір кімнати
-					}
-				}
-				else     //if room is occupied
-				{
-					cout << "Room Occupied. Please choose another room." << endl;
-					validRoom = false;
-				}
-				break;
-			}
-		}
-
-		if (!validRoom)
-		{
-			cout << "Invalid room number. Please enter again." << endl;
+bool Hotel::isRoomAvailable(int rno, int& index) {
+	for (int i = 0; i < nroom; i++) {
+		if (a[i].roomNumber == rno) {
+			index = i;
+			if (a[i].status == 0) return true;
+			cout << "Room Occupied. Please choose another room." << endl;
+			return false;
 		}
 	}
+	cout << "Invalid room number. Please enter again." << endl;
+	return false;
+}
+
+void Hotel::processBooking(int index, int rno) {
+	char ch2;
+	cout << "Room available." << endl;
+	a[index].displayroom();
+	cout << "Do you wish to continue? Press(Y/y): ";
+	cin >> ch2;
+
+	if (ch2 != 'Y' && ch2 != 'y') return;
+
+	c[ncust].accept();
+	cout << "Enter number of days of stay: ";
+	cin >> c[ncust].days;
+
+	c[ncust].bill = c[ncust].days * a[index].rent;
+	cout << "Your total bill will approx be Rs." << c[ncust].bill
+		<< ". Min adv payment=" << c[ncust].bill / 4
+		<< " What will you be paying? ";
+
+	cin >> c[ncust].payment_advance;
+
+	while (c[ncust].payment_advance < c[ncust].bill / 4 ||
+		c[ncust].payment_advance > c[ncust].bill) {
+		cout << "Enter valid amount: ";
+		cin >> c[ncust].payment_advance;
+	}
+
+	cout << "Thank you. Booking confirmed." << endl;
+	cout << "--------------------------------------------------------------" << endl;
+	cout << "Booking Id: " << c[ncust].booking_id
+		<< "\nName: " << c[ncust].name
+		<< "\nRoom no.: " << rno
+		<< "\nDate: ";
+
+	time_t my_time = time(NULL);
+	struct tm ltm;
+
+#ifdef _WIN32  
+	localtime_s(&ltm, &my_time);
+#else
+	localtime_r(&my_time, &ltm);
+#endif
+
+	cout << put_time(&ltm, "%Y-%m-%d %H:%M:%S") << endl;
+
+	a[index].status = 1;
+	c[ncust].room = rno;
+	c[ncust].status = 1;
+	ncust++;
 }
 
 void Hotel::searchcust()
@@ -401,73 +405,67 @@ void Hotel::Summary()		//PRINTING LIST OF ALL CUSTOMERS
 	}
 }
 
+void handleAdmin(Hotel& Taj) {
+	cout << "Add database of rooms in the hotel:" << endl;
+	Taj.addRooms();
+	cout << "Database updated. Going back to main menu." << endl;
+}
+
+void handleCustomer(Hotel& Taj) {
+	char ch1;
+	do {
+		// MENU 2 TO USE WHEN A CUSTOMER WANTS TO CHECK IN
+		cout << endl << "*************************************************************************************************************************************************************************************************" << endl;
+		cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~WELCOME TO TAJ GROUP OF HOTELS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
+		cout << "\n\t\t\t\t\t\t\t\t\t\t\t"
+			"Menu:\n\t\t\t\t\t\t\t\t\t\t\t"
+			"1.Check Availability of rooms.\n\t\t\t\t\t\t\t\t\t\t\t"
+			"2.Search Room\n\t\t\t\t\t\t\t\t\t\t\t"
+			"3.Check In\n\t\t\t\t\t\t\t\t\t\t\t"
+			"4.Search Customer\n\t\t\t\t\t\t\t\t\t\t\t"
+			"5.Guest Summary\n\t\t\t\t\t\t\t\t\t\t\t"
+			"6.Checkout.\n\t\t\t\t\t\t\t\t\t\t\t"
+			"7.Go back to Main Menu.\n\t\t\t\t\t\t\t\t\t\t\t"
+			"Enter your choice:";
+		cin >> ch1;
+
+		if (ch1 == '7') return;
+
+		switch (ch1) {
+		case '1': Taj.availability(); break;
+		case '2': Taj.searchroom(); break;
+		case '3': Taj.CheckIn(); break;
+		case '4': Taj.searchcust(); break;
+		case '5': Taj.Summary(); break;
+		case '6': Taj.CheckOut(); break;
+		default: cout << "Invalid Choice." << endl;
+		}
+	} while (true);
+}
+
 int main()
 {
 	Hotel Taj;		//CREATING OBJECT OF CLASS HOTEL
 	char ch;
+	string tabulation = "\t\t\t\t\t\t\t\t\t\t\t"
 	cout << endl << "======================================================================================WELCOME TO TAJ GROUP OF HOTELS========================================================================================";
 	do
 	{		//MENU TO USE AS EITHER ADMIN OR WHEN A CUSTOMER ENTERS
 		cout << endl << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
-		cout << endl << "\t\t\t\t\t\t\t\t\t\t\t"
-			"MENU:\n\t\t\t\t\t\t\t\t\t\t\t"
-			"1.OPERATE AS ADMIN\n\t\t\t\t\t\t\t\t\t\t\t"
-			"2.OPERATE AS CUSTOMER\n\t\t\t\t\t\t\t\t\t\t\t"
-			"3.EXIT\n\t\t\t\t\t\t\t\t\t\t\t"
-			"Enter your choice:";
+		cout << endl << tabulation
+			 << "MENU:\n" << tabulation
+			 << "1.OPERATE AS ADMIN\n" << tabulation
+			 << "2.OPERATE AS CUSTOMER\n" << tabulation
+			 << "3.EXIT\n" << tabulation
+			 << "Enter your choice:";
 		cin >> ch;
 		switch (ch)
 		{
 		case '1':
-			cout << "Add database of rooms in the hotel:" << endl;
-			Taj.addRooms();
-			cout << "Database updated. Going back to main menu." << endl;
+			handleAdmin(Taj);
 			break;
 		case '2':
-			char ch1;
-			do
-			{
-				//MENU 2 TO USE WHEN A CUSTOMER WANTS TO CHECK IN
-				cout << endl << "*************************************************************************************************************************************************************************************************" << endl;
-				cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~WELCOME TO TAJ GROUP OF HOTELS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
-				cout << "\n\t\t\t\t\t\t\t\t\t\t\t"
-					"Menu:\n\t\t\t\t\t\t\t\t\t\t\t"
-					"1.Check Availability of rooms.\n\t\t\t\t\t\t\t\t\t\t\t"
-					"2.Search Room\n\t\t\t\t\t\t\t\t\t\t\t"
-					"3.Check In\n\t\t\t\t\t\t\t\t\t\t\t"
-					"4.Search Customer\n\t\t\t\t\t\t\t\t\t\t\t"
-					"5.Guest Summary\n\t\t\t\t\t\t\t\t\t\t\t"
-					"6.Checkout.\n\t\t\t\t\t\t\t\t\t\t\t"
-					"7.Go back to Main Menu.\n\t\t\t\t\t\t\t\t\t\t\t"
-					"Enter your choice:";
-				cin >> ch1;
-				switch (ch1)
-				{
-				case '1':
-					Taj.availability();
-					break;
-				case '2':
-					Taj.searchroom();
-					break;
-				case '3':
-					Taj.CheckIn();
-					break;
-				case '4':
-					Taj.searchcust();
-					break;
-				case '5':
-					Taj.Summary();
-					break;
-				case '6':
-					Taj.CheckOut();
-					break;
-				case '7':
-					break;
-				default:
-					cout << "Invalid Choice." << endl;
-					break;
-				}
-			} while (ch1 != '7');
+			handleCustomer(Taj);
 			break;
 		case '3':
 			cout << "Thank you!";
