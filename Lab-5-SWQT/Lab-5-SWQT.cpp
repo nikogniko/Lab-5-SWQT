@@ -1,4 +1,5 @@
-//& "C:\Program Files\Cppcheck\cppcheck.exe" --enable=all Project.cpp
+//for VS Code
+// & "C:\Program Files\Cppcheck\cppcheck.exe" --enable=all Project.cpp
 //--inconclusive --quiet --checkers-report=file.txt
 
 #define _CRT_SECURE_NO_WARNINGS
@@ -32,9 +33,10 @@ public:
 	}
 	void accept();				//ACCEPT CUSTOMER DETAILS
 	void display();				//DISPLAY CUSTOMER DETAILS
-	friend class room;
+	friend class Room;
 	friend class Hotel;
 };
+
 void Customer::accept()		//ACCEPTING CUSTOMER DETAILS
 {
 	cout << "Enter customer name: ";
@@ -42,24 +44,26 @@ void Customer::accept()		//ACCEPTING CUSTOMER DETAILS
 	getline(cin, name);
 	cout << "Enter Customer address: ";
 	getline(cin, address);
-flag:
-	cout << "Enter mobile number: ";
-	cin >> phone;
-	for (int i = 0; i < (phone.length()); i++)	//PHONE NUMBER VALIDATIONS
-	{									//PHONE NUMBER NEEDS TO BE ALL DIGITS AND 10 IN LENGTH
-		if (!isdigit(phone[i]))
-		{
-			cout << "Phone number has to be in digits.\n";
-			goto flag;
+
+	while (true) {
+		cout << "Enter mobile number: ";
+		cin >> phone;
+		bool valid = true;
+
+		for (char c : phone) {
+			if (!isdigit(c)) {
+				cout << "Phone number has to be in digits.\n";
+				valid = false;
+				break;
+			}
 		}
-	}
-	if (phone.length() != 10)		//PHONE LENGTH VALIDATIONS
-	{
-		cout << "Phone number should be 10 digits.\n";
-		goto flag;
+		if (phone.length() != 10) {
+			cout << "Phone number should be 10 digits.\n";
+			valid = false;
+		}
+		if (valid) break;
 	}
 }
-//
 
 void Customer::display()		//DISPLAYING CUSTOMER DETAILS
 {
@@ -71,6 +75,7 @@ void Customer::display()		//DISPLAYING CUSTOMER DETAILS
 	if (status == 1) { cout << "|\t\t-\t\t|" << endl; }
 	else { cout << "|\tCHECKED OUT.\t\t|" << endl; }
 }
+
 //CLASS ROOM
 //TO STORE DATA OF ALL ROOMS IN THE HOTEL
 class Room
@@ -95,40 +100,38 @@ public:
 		status = 0;
 	}
 };
+
 void Room::acceptroom(int rno)		//ACCEPTING ALL ROOM DETAILS
 {
 	roomNumber = rno;	//ROOM NUMBER
 	cout << "Type AC/Non-AC (A/N) : ";
 	cin >> ac;
-	while (ac != 'A' && ac != 'N')		//VALIDATIONS
-	{
+	while (ac != 'A' && ac != 'N') {		//VALIDATIONS
 		cout << "Please Re-Enter Type: AC/Non-AC (A/N) : ";
 		cin >> ac;
 	}
 	cout << "Type Comfort Suite or Normal (S/N) : ";
 	cin >> type;
-	while (type != 'S' && type != 'N')
-	{
+	while (type != 'S' && type != 'N') {
 		cout << "Please Re-enter Type Comfort Suite or Normal (S/N) : ";
 		cin >> type;
 	}
 	cout << "Type Size (B/S) : ";
 	cin >> stype;
-	while (stype != 'B' && stype != 'S')
-	{
+	while (stype != 'B' && stype != 'S') {
 		cout << "Please Re-enter Type Size (B/S) : ";
 		cin >> stype;
 	}
 	cout << "Daily Rent : ";
 	cin >> rent;
-	while (rent < 0 || rent>20000)
-	{
-		cout << "Please enter valid rent.";
+	while (rent < 0 || rent > 20000) {
+		cout << "Please enter valid rent: ";
 		cin >> rent;
 	}
 	status = 0;	//BOOKING STATUS OF THE ROOM
 	cout << "\nRoom Added Successfully!" << endl;
 }
+
 void Room::displayroom()
 {
 	cout << "| " << roomNumber << ".\t\t|\t" << ac << "\t\t|\t" << type << "\t\t|\t" << stype << "\t\t|\t" << rent << "\t\t|\t";
@@ -136,7 +139,8 @@ void Room::displayroom()
 	else { cout << "Booked.\t\t|"; }
 	cout << endl;
 }
-//class Hotel
+
+// CLASS HOTEL
 class Hotel
 {
 	Room a[100];			//ARRAY OF ROOMS
@@ -151,41 +155,43 @@ public:
 	void CheckOut();		//CHECKOUT AND BILLING PROCEDURE
 	void Summary();			//GUEST SUMMARY
 };
+
 void Hotel::addRooms()
 {
-	int rno;
 	cout << "Enter number of rooms: ";
-	cin >> nroom;		//ACCEPTING NUMBER OF ROOMS
-	while (nroom <= 0)
-	{
-		cout << "Invalid. Enter valid number of rooms.";
+	cin >> nroom;			//ACCEPTING NUMBER OF ROOMS
+	while (nroom <= 0) {
+		cout << "Invalid. Enter valid number of rooms: ";
 		cin >> nroom;
 	}
-	for (int i = 0; i < nroom; i++)
-	{
+
+	for (int i = 0; i < nroom; i++) {
 		cout << "ROOM " << (i + 1) << endl;
-	flag:
-		cout << endl << "Enter room number : ";
-		cin >> rno;
-		if (rno <= 0)		//VALIDATIONS
-		{
-			cout << endl << "This room number is invalid! Please Re-enter the room number : ";
-			goto flag;
-		}
-		for (int i = 0; i < nroom; i++)	//VALIDATIONS FOR REPETITIVE ROOM NUMBERS
-		{
-			if (a[i].roomNumber == rno)
-			{
-				cout << "Invalid. Repetitive room numbers." << endl;
-				goto flag;
+		int rno;
+		while (true) {
+			cout << endl << "Enter room number : ";
+			cin >> rno;
+			if (rno <= 0) {
+				cout << "This room number is invalid! Please Re-enter: ";
+				continue;
 			}
+			bool duplicate = false;		//VALIDATIONS FOR REPETITIVE ROOM NUMBERS
+			for (int j = 0; j < i; j++) {
+				if (a[j].roomNumber == rno) {
+					cout << "Invalid. Repetitive room number. Try again.\n";
+					duplicate = true;
+					break;
+				}
+			}
+			if (!duplicate) break;
 		}
 		a[i].acceptroom(rno);		//CALLING FUNCTION ACCEPT ROOM FROM CLASS ROOM
 	}
 }
+
 void Hotel::availability()		//CHECKING AVAILABILITY OF THE ROOMS
 {
-	if (nroom == 0)
+	if (nroom == 0) 
 	{
 		cout << "Please add rooms." << endl;
 		return;
@@ -197,6 +203,7 @@ void Hotel::availability()		//CHECKING AVAILABILITY OF THE ROOMS
 		a[i].displayroom();	//DISPLAYING ROOM DETAILS
 	}
 }
+
 void Hotel::searchroom()	//SEARCH FOR A PARTICULAR TYPE OF A ROOM
 {
 	if (nroom == 0)
@@ -226,77 +233,95 @@ void Hotel::searchroom()	//SEARCH FOR A PARTICULAR TYPE OF A ROOM
 		cout << "No such room is available." << endl;
 	}
 }
-void Hotel::CheckIn()		//CHECK IN OF A CUSTOMER
+
+void Hotel::CheckIn() // CHECK IN OF A CUSTOMER
 {
 	if (nroom == 0)
 	{
 		cout << "Please add rooms." << endl;
 		return;
 	}
-	int i, rno;
-	if (ncust <= nroom) {	//CHECKING CONDITION IF HOTEL HAS EMPTY ROOMS
-		c[ncust].booking_id = ncust + 1;	//ALLOTING CUSTOMER ID TO THE CUSTOMER
-	flag:
-		int flag1 = 0;
-		cout << "Enter room number=";		//ASKING WHAT ROOM NUMBER CUSTOMER WANTS TO STAY IN
+
+	if (ncust > nroom)	//CHECKING CONDITION IF HOTEL HAS EMPTY ROOMS
+	{
+		cout << "Sorry! Hotel is Full." << endl;
+		return;
+	}
+
+	c[ncust].booking_id = ncust + 1; // ALLOTING CUSTOMER ID TO THE CUSTOMER
+	int rno;
+	bool validRoom = false;
+
+	while (!validRoom)
+	{
+		cout << "Enter room number="; // ASKING WHAT ROOM NUMBER CUSTOMER WANTS TO STAY IN
 		cin >> rno;
-		for (i = 0; i < nroom; i++) {
+
+		for (int i = 0; i < nroom; i++)
+		{
 			if (rno == a[i].roomNumber)
 			{
-				flag1 = 1;
+				validRoom = true;
+
+				if (a[i].status == 0) // CHECKING IF ROOM IS UNOCCUPIED
+				{
+					char ch2;
+					cout << "Room available." << endl;
+					a[i].displayroom();
+					cout << "Do you wish to continue? Press(Y/y)";
+					cin >> ch2;
+
+					if (ch2 == 'Y' || ch2 == 'y')
+					{
+						c[ncust].accept(); // ACCEPTING CUSTOMER DETAILS
+						cout << "Enter number of days of stay: ";
+						cin >> c[ncust].days;
+						c[ncust].bill = c[ncust].days * a[i].rent;	//generating bill. bill= No. of days * rent per day.
+
+						cout << "Your total bill will approx be Rs." << c[ncust].bill << ". Min adv payment=" << c[ncust].bill / 4 << " What will you be paying?";
+						cin >> c[ncust].payment_advance;
+
+						while (c[ncust].payment_advance < c[ncust].bill / 4 || c[ncust].payment_advance > c[ncust].bill)
+						{
+							cout << "Enter valid amount.";
+							cin >> c[ncust].payment_advance;
+						}
+
+						cout << "Thank you. Booking confirmed." << endl;
+						cout << "--------------------------------------------------------------" << endl;
+						cout << "Booking Id: " << c[ncust].booking_id << "\nName: " << c[ncust].name << "\nRoom no.: " << rno << "\nDate: ";
+
+						time_t my_time = time(NULL);
+						tm* ltm = localtime(&my_time);
+						cout << put_time(ltm, "%Y-%m-%d %H:%M:%S") << endl;
+
+						a[i].status = 1; // changing room status to booked
+						c[ncust].room = rno;
+						c[ncust].status = 1;
+						ncust++;
+						return;
+					}
+					else
+					{
+						validRoom = false; // Повторний вибір кімнати
+					}
+				}
+				else     //if room is occupied
+				{
+					cout << "Room Occupied. Please choose another room." << endl;
+					validRoom = false;
+				}
 				break;
 			}
 		}
-		if (flag1 == 0) {
-			cout << "Invalid room number. Please Enter again.\n";
-			goto flag;
-		}
-		if (a[i].status == 0)		//CHECKING IF ROOM IS UNOCCUPIED
+
+		if (!validRoom)
 		{
-			char ch2;
-			cout << "Room available." << endl;
-			a[i].displayroom();
-			cout << "Do you wish to continue? Press(Y/y)";		//CONFIRMATION
-			cin >> ch2;
-			if (ch2 == 'Y' || ch2 == 'y')
-			{
-				c[ncust].accept();		//ACCEPTING CUSTOMER DETAILS
-				cout << "Enter number of days of stay: ";
-				cin >> c[ncust].days;
-				c[ncust].bill = c[ncust].days * a[i].rent;		//generating bill. bill= No. of days * rent per day.
-				cout << "Your total bill will approx be Rs." << (c[ncust].bill) << "." << endl << ". Min adv payment=" << c[ncust].bill / 4 << "What will you be paying?";
-				cin >> c[ncust].payment_advance;
-				while (c[ncust].payment_advance<c[ncust].bill / 4 || c[ncust].payment_advance>c[ncust].bill)
-				{
-					cout << "Enter valid amount.";
-					cin >> c[ncust].payment_advance;
-				}
-				cout << "Thank you. Booking confirmed." << endl;		//confirmed booking
-				cout << "--------------------------------------------------------------" << endl;		//printing booking details
-				cout << "Booking Id: " << c[ncust].booking_id << "\nName: " << c[ncust].name << "\nRoom no.: " << rno << "\nDate: ";
-				time_t my_time = time(NULL);
-				// ctime() used to give the present time
-				printf("%s", ctime(&my_time));
-				a[i].status = 1;		//changing room status to booked
-				c[ncust].room = rno;		//alloting room to customer
-				c[ncust].status = 1;
-				ncust++;
-			}
-			else		//if needs to change room number
-			{
-				goto flag;
-			}
+			cout << "Invalid room number. Please enter again." << endl;
 		}
-		else		//if room is occupied
-		{
-			cout << "Room Occupied. Please choose another room." << endl;
-		}
-	}
-	else		//CONDITION ALL ROOMS ARE BOOKED
-	{
-		cout << "Sorry! Hotel is Full." << endl;
 	}
 }
+
 void Hotel::searchcust()
 {
 	int id, flag = 0;
