@@ -3,10 +3,11 @@
 //--inconclusive --quiet --checkers-report=file.txt
 
 #define _CRT_SECURE_NO_WARNINGS
-#include <iostream>
 #include <string>
-#include <iomanip>
 #include <ctime>
+#include <iomanip>
+#include <iostream>
+
 using namespace std;
 
 //Class Customer
@@ -292,8 +293,13 @@ void Hotel::CheckIn() // CHECK IN OF A CUSTOMER
 						cout << "Booking Id: " << c[ncust].booking_id << "\nName: " << c[ncust].name << "\nRoom no.: " << rno << "\nDate: ";
 
 						time_t my_time = time(NULL);
-						tm* ltm = localtime(&my_time);
-						cout << put_time(ltm, "%Y-%m-%d %H:%M:%S") << endl;
+						struct tm ltm;  // Оголошуємо змінну для структури tm
+#ifdef _WIN32  // Перевіряємо, чи компілюємо в Windows
+						localtime_s(&ltm, &my_time);  // Windows-специфічна потокобезпечна версія
+#else
+						localtime_r(&my_time, &ltm);  // POSIX-версія для Linux/macOS
+#endif
+						cout << put_time(&ltm, "%Y-%m-%d %H:%M:%S") << endl;
 
 						a[i].status = 1; // changing room status to booked
 						c[ncust].room = rno;
