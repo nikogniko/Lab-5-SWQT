@@ -258,14 +258,13 @@ void Hotel::CheckIn() {
 		return;
 	}
 
-	c[ncust].booking_id = ncust + 1; // Присвоєння ID клієнту
 	int rno, index;
-
 	do {
 		cout << "Enter room number=";
 		cin >> rno;
 	} while (!isRoomAvailable(rno, index));
 
+	c[ncust].booking_id = ncust + 1; // Присвоєння ID клієнту
 	processBooking(index, rno);
 }
 
