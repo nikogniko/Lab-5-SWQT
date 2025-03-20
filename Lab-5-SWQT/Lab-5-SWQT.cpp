@@ -388,18 +388,21 @@ void Hotel::CheckOut()		//CHECKING OUT
 }
 void Hotel::Summary()		//PRINTING LIST OF ALL CUSTOMERS
 {
+	string tabulation = "\t\t";
+
 	if (nroom == 0)
 	{
 		cout << "No customers as yet." << endl;
 		return;
 	}
+
 	cout << "Guest Summary:" << endl;
-	cout << "Id.\t\t";
-	cout << "|	Name	\t\t";
-	cout << "|	Phone	\t\t";
-	cout << "|	Address	\t\t";
+	cout << "Id." << tabulation;
+	cout << "|	Name	" << tabulation;
+	cout << "|	Phone	" << tabulation;
+	cout << "|	Address	" << tabulation;
 	cout << "|	Room no	: \t";
-	cout << "|	Status	\t\t|" << endl;
+	cout << "|	Status	" << tabulation << " | " << endl;
 	for (int i = 0; i < ncust; i++)
 	{
 		c[i].display();
