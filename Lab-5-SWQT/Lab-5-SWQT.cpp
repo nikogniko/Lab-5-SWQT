@@ -333,6 +333,8 @@ void Hotel::processBooking(int index, int rno) {
 
 void Hotel::searchcust()
 {
+	string tabulation = "\t\t\t"
+
 	int id, flag = 0;
 	cout << "Enter booking id of customer.";
 	cin >> id;
@@ -340,10 +342,10 @@ void Hotel::searchcust()
 	{
 		if (c[i].booking_id == id)
 		{
-			cout << "\t\t\t Name" << setw(20);
-			cout << "\t\t\t Phone" << setw(20);
-			cout << "\t\t\t Address" << setw(20);
-			cout << "\t\t\tRoom no: " << setw(20) << endl;
+			cout << tabulation << " Name" << setw(20);
+			cout << tabulation << " Phone" << setw(20);
+			cout << tabulation << " Address" << setw(20);
+			cout << tabulation << " Room no: " << setw(20) << endl;
 			c[i].display();
 			flag = 1;
 		}
