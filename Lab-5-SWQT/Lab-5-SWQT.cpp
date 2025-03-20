@@ -314,7 +314,7 @@ void Hotel::processBooking(int index, int rno) {
 		<< "\nRoom no.: " << rno
 		<< "\nDate: ";
 
-	time_t my_time = time(NULL);
+	time_t my_time = time(nullptr);
 	struct tm ltm;
 
 #ifdef _WIN32  
@@ -412,20 +412,22 @@ void handleAdmin(Hotel& Taj) {
 
 void handleCustomer(Hotel& Taj) {
 	char ch1;
+	string tabulation = "\t\t\t\t\t\t\t\t\t\t\t"
+
 	do {
 		// MENU 2 TO USE WHEN A CUSTOMER WANTS TO CHECK IN
 		cout << endl << "*************************************************************************************************************************************************************************************************" << endl;
 		cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~WELCOME TO TAJ GROUP OF HOTELS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
-		cout << "\n\t\t\t\t\t\t\t\t\t\t\t"
-			"Menu:\n\t\t\t\t\t\t\t\t\t\t\t"
-			"1.Check Availability of rooms.\n\t\t\t\t\t\t\t\t\t\t\t"
-			"2.Search Room\n\t\t\t\t\t\t\t\t\t\t\t"
-			"3.Check In\n\t\t\t\t\t\t\t\t\t\t\t"
-			"4.Search Customer\n\t\t\t\t\t\t\t\t\t\t\t"
-			"5.Guest Summary\n\t\t\t\t\t\t\t\t\t\t\t"
-			"6.Checkout.\n\t\t\t\t\t\t\t\t\t\t\t"
-			"7.Go back to Main Menu.\n\t\t\t\t\t\t\t\t\t\t\t"
-			"Enter your choice:";
+		cout << "\n" << tabulation
+			<< "Menu:\n" << tabulation
+			<< "1.Check Availability of rooms.\n" << tabulation
+			<< "2.Search Room\n" << tabulation
+			<< "3.Check In\n" << tabulation
+			<< "4.Search Customer\n" << tabulation
+			<< "5.Guest Summary\n" << tabulation
+			<< "6.Checkout.\n" << tabulation
+			<< "7.Go back to Main Menu.\n" << tabulation
+			<< "Enter your choice:";
 		cin >> ch1;
 
 		if (ch1 == '7') return;
