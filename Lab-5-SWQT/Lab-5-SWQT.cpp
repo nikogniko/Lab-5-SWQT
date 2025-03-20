@@ -398,11 +398,11 @@ void Hotel::Summary()		//PRINTING LIST OF ALL CUSTOMERS
 
 	cout << "Guest Summary:" << endl;
 	cout << "Id." << tabulation;
-	cout << "|	Name	" << tabulation;
-	cout << "|	Phone	" << tabulation;
-	cout << "|	Address	" << tabulation;
-	cout << "|	Room no	: \t";
-	cout << "|	Status	" << tabulation << " | " << endl;
+	cout << "|\tName\t\t\t" << tabulation;
+	cout << "|\tPhone\t\t" << tabulation;
+	cout << "|\tAddresst" << tabulation;
+	cout << "|\tRoom no	:\t";
+	cout << "|\tStatus\t" << tabulation << " | " << endl;
 	for (int i = 0; i < ncust; i++)
 	{
 		c[i].display();
